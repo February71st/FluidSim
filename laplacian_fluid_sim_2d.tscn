@@ -1,0 +1,8 @@
+[gd_scene format=3 uid="uid://cnvwri0nenv8l"]
+
+[ext_resource type="Script" uid="uid://c62ndcsq0l1i" path="res://Scripts/LaplacianFluidSim2d.cs" id="1_t8x1p"]
+
+[node name="LaplacianFluidSim2D" type="Node2D" unique_id=502335495]
+script = ExtResource("1_t8x1p")
+MaxParticles = 1000
+NumberOfParticles = 1000
