@@ -4,5 +4,8 @@
 
 [node name="LaplacianFluidSim2D" type="Node2D" unique_id=502335495]
 script = ExtResource("1_t8x1p")
-MaxParticles = 1000
-NumberOfParticles = 1000
+ParticleTypes = Array[Resource]([null])
+MaxParticles = 2000
+NumberOfParticles = 100
+SmoothingRadius = 30.0
+TargetDensity = 0.0001
