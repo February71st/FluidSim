@@ -6,8 +6,7 @@ using MySpatial;
 namespace FluidSim{
 	public partial class LaplacianFluidSim2d : Node2D
 	{
-		[Export]
-		Particle[] ParticleTypes;
+		[ExportCategory("Physics")]
 		private Vector2 Gravity;
 		private float _gravityStrength = 980F;
 		[Export(PropertyHint.Range,"-1000,1000")]
@@ -32,12 +31,32 @@ namespace FluidSim{
 				Gravity = _gravityStrength*Vector2.FromAngle(-value*MathF.PI/180);
 			}
 		}
+
+		[ExportCategory("Particle Settings")]
+
+		[Export]
+		Particle[] ParticleTypes;
+		
+		[Export]
+		public float ParticleDisplayRadius = 5F;
+
+		[ExportCategory("Simulation Detail")]
 		[Export]
 		public uint MaxParticles = 500;
 		[Export]
 		public uint NumberOfParticles = 500;
+		private float _smoothingRadius = 50F;
 		[Export]
-		public float ParticleDisplayRadius = 5F;
+		public float SmoothingRadius
+		{
+			get{return _smoothingRadius;}
+			set
+			{
+				_smoothingRadius = value;
+				_OnSmoothingRadiusUpdate();
+			}
+		}
+		
 		[Export]
 		/// <value>
 		/// The number of millilitres of fluid represented by a single particle.
@@ -45,6 +64,8 @@ namespace FluidSim{
 		/// Determines the mass of a particle of the substance
 		/// </value>
 		public float ParticleMillilitres = 0.05F;
+
+		[ExportCategory("Bounding Box")]
 
 		[Export]
 		public Vector2 BoundingBoxPosition = new Vector2(0,0);
@@ -58,17 +79,6 @@ namespace FluidSim{
 			{
 				_boundingBoxDims = value;
 				aspectRatio = _boundingBoxDims.X/_boundingBoxDims.Y;
-			}
-		}
-		private float _smoothingRadius = 50F;
-		[Export]
-		public float SmoothingRadius
-		{
-			get{return _smoothingRadius;}
-			set
-			{
-				_smoothingRadius = value;
-				_OnSmoothingRadiusUpdate();
 			}
 		}
 		private void _OnSmoothingRadiusUpdate()
