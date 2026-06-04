@@ -32,10 +32,15 @@ namespace FluidSim{
 			}
 		}
 
+		[Export(PropertyHint.Range,"0,100")]
+		float Stiffness = 7;
+
 		[ExportCategory("Particle Settings")]
 
 		[Export]
 		Particle[] ParticleTypes;
+
+		private Particle[] particleMappings;
 		
 		[Export]
 		public float ParticleDisplayRadius = 5F;
@@ -121,6 +126,7 @@ namespace FluidSim{
 
 		public void Initialise()
 		{
+			particleMappings = new Particle[MaxParticles];
 			Gravity = _gravityStrength*Vector2.FromAngle(-_gravityDir*MathF.PI/180);
 			Positions = new Vector2[MaxParticles];
 			PredictedPositions = new Vector2[MaxParticles];
@@ -128,10 +134,14 @@ namespace FluidSim{
 			{
 				Positions[i] = new Vector2(400+rng.NextSingle()*400,250+rng.NextSingle()*250);
 			}
+			for(int i = 0; i < MaxParticles; i++)
+			{
+				particleMappings[i] = ParticleTypes[2*i/MaxParticles];
+			}
 			Velocities = new Vector2[MaxParticles];
 			Densities = new float[MaxParticles];
 			_OnSmoothingRadiusUpdate();
-			SpatialHash = new UnboundedSpatialHash(10*MaxParticles,MaxParticles,SmoothingRadius);
+			SpatialHash = new UnboundedSpatialHash(10*MaxParticles,MaxParticles,SmoothingRadius,SmoothingRadius);
 			SpatialHash.Update(Positions);
 			PrecalculateDensities();
 		}
@@ -149,7 +159,7 @@ namespace FluidSim{
 				Velocities[i] += GravityVec;
 				PredictedPositions[i] = Positions[i] + Velocities[i]/120;
 			});
-			SpatialHash.Update(PredictedPositions);
+			SpatialHash.Update(Positions);
 			PrecalculateDensities();
 			Parallel.For(0, (int)NumberOfParticles, i=>
 			{
@@ -159,7 +169,9 @@ namespace FluidSim{
 			
 			Parallel.For(0, NumberOfParticles, i=>
 			{
+				//Velocities[i] += Vector2.FromAngle(MathF.Tau*rng.NextSingle())*200*timestep;
 				Positions[i] += Velocities[i]*timestep;
+				
 				if(Positions[i].X > 1000 || Positions[i].X < 200)
 				{
 					Velocities[i].X *= -0.58F;
@@ -205,21 +217,23 @@ namespace FluidSim{
 					Vector2 dir = dist > 0?diff/dist:Vector2.FromAngle(MathF.Tau*rng.NextSingle());
 					float slope = SmoothingFuncDeriv(dist);
 					float density = Densities[index];
-					force += -10000*GetSharedPressureMag(density,Densities[i]) * dir * slope * Masses/density;
+					force += Masses*Masses*(GetPressureMag(i)/(Densities[i]*Densities[i]) + GetPressureMag((int)index)/(density*density))*slope*dir;//-10000*GetSharedPressureMag((int)index,i) * dir * slope * Masses/density;
 				}
 			});
 			return force;
 		}
-		public float GetPressureMag(float density)
+		public float GetPressureMag(int i)
 		{
-			//negative if density is higher than target density
-			float error = TargetDensity - density;
-			return 10*error*error*error;
+			return Stiffness*particleMappings[i].TargetDensity*(MathF.Pow(Densities[i]/particleMappings[i].TargetDensity,1)-1)/1;
+			// float density = Densities[i];
+			// //negative if density is higher than target density
+			// float error = 4*(particleMappings[i].TargetDensity - density);
+			// return particleMappings[i].PressureMultiplier*error*error*error;
 		}
 
-		public float GetSharedPressureMag(float density1, float density2)
+		public float GetSharedPressureMag(int i1, int i2)
 		{
-			return(GetPressureMag(density1)+GetPressureMag(density2))/2;
+			return(GetPressureMag(i1)+GetPressureMag(i2))/2;
 		}
 		private float DerivConstantTerm = 1;
 		public float SmoothingFuncDeriv(float dist)
@@ -273,6 +287,7 @@ namespace FluidSim{
 			// 		density += SmoothingFunc(dist)*Masses;
 			// 	}	
 			// }
+			int count = 0;
 			SpatialHash.ForEachInProximity(pos, 1, index =>
 			{
 				Vector2 pointPos = Positions[index];
@@ -280,8 +295,14 @@ namespace FluidSim{
 				if(dist < SmoothingRadius)
 				{
 					density += SmoothingFunc(dist)*Masses;
+					count++;
 				}	
+				
 			});
+			if(density <= 0)
+			{
+				GD.Print(count,pos);
+			}
 			return density;
 		}
 
@@ -290,11 +311,11 @@ namespace FluidSim{
 		{
 			Parallel.For(0,Densities.Length, i=>
 			{
-				Densities[i] = DensityAtPoint(PredictedPositions[i]);
-				// if(Densities[i] <= 0)
-				// {
-				// 	GD.Print(PredictedPositions[i]);
-				// }
+				Densities[i] = DensityAtPoint(Positions[i]);
+				if(Densities[i] <= 0)
+				{
+					GD.Print(Positions[i],Velocities[i]);
+				}
 				// Debug.Assert(Densities[i] >= 0);
 			});
 		}
@@ -334,7 +355,7 @@ namespace FluidSim{
 			base._Draw();
 			for(int i = 0; i < NumberOfParticles; i++)//= Math.Max(1,(int)NumberOfParticles/500))
 			{
-				DrawCircle(Positions[i],ParticleDisplayRadius,new Color(Densities[i],0.2F,0.2F,0.5F));//Colors.White);
+				DrawCircle(Positions[i],ParticleDisplayRadius,particleMappings[i].ParticleColour);//Colors.White);
 			}
 			if (Input.IsMouseButtonPressed(MouseButton.Left))
 			{

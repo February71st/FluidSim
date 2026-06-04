@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="Particle" format=3 uid="uid://cal0jttph553t"]
+
+[ext_resource type="Script" uid="uid://d3pnf4d2lk4yu" path="res://Scripts/Particle/Particle.cs" id="1_17wcc"]
+
+[resource]
+script = ExtResource("1_17wcc")
+ParticleMass = 5.0
+TargetDensity = 0.03
+SmoothingRadius = 30.0
+PressureMultiplier = 1.0
+ParticleColour = Color(0.59, 0.24190001, 0.58419824, 0.5019608)
+metadata/_custom_type_script = "uid://d3pnf4d2lk4yu"

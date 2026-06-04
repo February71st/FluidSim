@@ -15,14 +15,14 @@ namespace MySpatial
 		public uint QueryLength;
 		public float PointRadius;
 		
-		public UnboundedSpatialHash(uint TableSize, uint NumPoints, double PointRadius)
+		public UnboundedSpatialHash(uint TableSize, uint NumPoints, double PointRadius, float CellWidth)
 		{
 			this.TableSize = TableSize;
 			PointIndices = new uint[NumPoints];
 			QueryResults = new uint[NumPoints];
 			HashTable = new uint[TableSize + 1];
 			this.PointRadius = (float)PointRadius;
-			CellSideLength = this.PointRadius*2;
+			CellSideLength = CellWidth;
 		}
 
 		public Vector2I GetGridCoords(Vector2 pos)
