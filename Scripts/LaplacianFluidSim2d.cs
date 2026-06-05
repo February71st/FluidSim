@@ -3,6 +3,7 @@ using System;
 using System.Diagnostics;
 using System.Threading.Tasks;
 using MySpatial;
+using SPHKernels;
 namespace FluidSim{
 	public partial class LaplacianFluidSim2d : Node2D
 	{
@@ -163,7 +164,7 @@ namespace FluidSim{
 			PrecalculateDensities();
 			Parallel.For(0, (int)NumberOfParticles, i=>
 			{
-				Velocities[i] += 50F*timestep*GetPressureForce(i)/Densities[i];
+				Velocities[i] = -0.001F*timestep*GetPressureForce(i)/Densities[i];
 				//Velocities[i] += timestep*GetMouseForce(PredictedPositions[i],mousePos)/Densities[i];
 			});
 			
@@ -215,7 +216,7 @@ namespace FluidSim{
 				{
 					//points towards positive grad
 					Vector2 dir = dist > 0?diff/dist:Vector2.FromAngle(MathF.Tau*rng.NextSingle());
-					float slope = SmoothingFuncDeriv(dist);
+					float slope = Kernels.CubicSplineDeriv2D(dist/_smoothingRadius,_smoothingRadius);//SmoothingFuncDeriv(dist);
 					float density = Densities[index];
 					force += Masses*Masses*(GetPressureMag(i)/(Densities[i]*Densities[i]) + GetPressureMag((int)index)/(density*density))*slope*dir;//-10000*GetSharedPressureMag((int)index,i) * dir * slope * Masses/density;
 				}
@@ -294,7 +295,7 @@ namespace FluidSim{
 				float dist = (pointPos - pos).Length();
 				if(dist < SmoothingRadius)
 				{
-					density += SmoothingFunc(dist)*Masses;
+					density += Kernels.CubicSpline2D(dist/_smoothingRadius,_smoothingRadius);//SmoothingFunc(dist)*Masses;
 					count++;
 				}	
 				

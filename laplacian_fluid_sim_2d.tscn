@@ -6,9 +6,9 @@
 
 [node name="LaplacianFluidSim2D" type="Node2D" unique_id=502335495]
 script = ExtResource("1_t8x1p")
-Stiffness = 28.0
+GravityStrength = 0.0
+Stiffness = 9.3084112
 ParticleTypes = Array[Resource]([ExtResource("2_6xfry"), ExtResource("3_6xfry")])
-MaxParticles = 2000
 NumberOfParticles = 100
 SmoothingRadius = 30.0
 TargetDensity = 0.0001
