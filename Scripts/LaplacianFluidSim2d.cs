@@ -3,6 +3,7 @@ using System;
 using System.Diagnostics;
 using System.Threading.Tasks;
 using MySpatial;
+using SPHKernels;
 namespace FluidSim{
 	public partial class LaplacianFluidSim2d : Node2D
 	{
