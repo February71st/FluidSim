@@ -4,7 +4,7 @@
 
 [resource]
 script = ExtResource("1_1wor0")
-ParticleMass = 5.0
+ParticleMass = 10.0
 TargetDensity = 0.02
 SmoothingRadius = 30.0
 PressureMultiplier = 1.0
