@@ -279,9 +279,9 @@ public partial class LaplacianFluidSim : Node2D
 		float neededVol = avgMass/targetDensity;
 		GD.Print("Needed vol:\t",neededVol);
 		float ratio = neededVol/vol;
-		if(ratio < float.CreateChecked(1))
+		if(ratio < 1)
 		{
-			box.Origin += box.Origin*(float.CreateChecked(1) - ratio)/float.CreateChecked(2);
+			box.Origin += box.Origin*(1 - ratio)/2;
 			box.Extent *= ratio;
 		}
 		for(int i = 0; i < NumberOfParticles; i++)
