@@ -281,7 +281,7 @@ public partial class LaplacianFluidSim : Node2D
 		float ratio = neededVol/vol;
 		if(ratio < 1)
 		{
-			box.Origin += box.Origin*(1 - ratio)/2;
+			box.Origin += box.Extent*(1 - ratio)/2;
 			box.Extent *= ratio;
 		}
 		for(int i = 0; i < NumberOfParticles; i++)
