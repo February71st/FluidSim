@@ -1,14 +1,13 @@
 [gd_scene format=3 uid="uid://cnvwri0nenv8l"]
 
-[ext_resource type="Script" uid="uid://c62ndcsq0l1i" path="res://Scripts/LaplacianFluidSim2d.cs" id="1_t8x1p"]
-[ext_resource type="Resource" uid="uid://d1enjsm5v1pk8" path="res://Resources/Particles/sparse.tres" id="2_6xfry"]
-[ext_resource type="Resource" uid="uid://cal0jttph553t" path="res://Resources/Particles/dense.tres" id="3_6xfry"]
+[ext_resource type="Script" uid="uid://bhnk20k4ed033" path="res://Scripts/LaplacianFluidSim.cs" id="1_t8x1p"]
 
 [node name="LaplacianFluidSim2D" type="Node2D" unique_id=502335495]
 script = ExtResource("1_t8x1p")
-GravityStrength = 0.0
-Stiffness = 9.3084112
-ParticleTypes = Array[Resource]([ExtResource("2_6xfry"), ExtResource("3_6xfry")])
-NumberOfParticles = 100
-SmoothingRadius = 30.0
-TargetDensity = 0.0001
+NumberOfParticles = 1500
+SmoothingRadius = 0.19999999999999998
+BB = AABB(0, 0, 0, 8, 5, 0)
+GravityDirection = -1.5707963267948966
+Viscosity = 0.01
+PressureMultiplier = 1.3
+DisplayOrigin = Vector2(300, 20)

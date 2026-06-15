@@ -4,8 +4,8 @@
 
 [resource]
 script = ExtResource("1_17wcc")
-ParticleMass = 5.0
-TargetDensity = 0.03
+ParticleMass = 10.0
+TargetDensity = 0.035
 SmoothingRadius = 30.0
 PressureMultiplier = 1.0
 ParticleColour = Color(0.59, 0.24190001, 0.58419824, 0.5019608)
