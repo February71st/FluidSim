@@ -8,7 +8,7 @@ using SPHTypes;
 using SPHKernels.CubicSpline;
 
 namespace FluidSim;
-public partial class LaplacianFluidSim2d : Node2D
+public partial class SPHFluidSim2d : Node2D
 {
 	[ExportCategory("Physics")]
 	private Vector2 Gravity;
@@ -119,7 +119,7 @@ public partial class LaplacianFluidSim2d : Node2D
 	public Vector2[] Velocities;
 	public float Masses = 10;
 
-	public LaplacianFluidSim2d()
+	public SPHFluidSim2d()
 	{
 	}
 	// Called when the node enters the scene tree for the first time.

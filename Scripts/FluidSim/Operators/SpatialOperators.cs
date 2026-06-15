@@ -19,7 +19,6 @@ public static class SpatialOperators2D
     {
         float propertyVal = 0;
         Godot.Vector2 pos = particles[i].Position;
-        float Ai = propertySamples[i];
         spatialHash.ForEachInProximity(pos, 1, j =>
         {
             Godot.Vector2 pointPos = particles[j].Position;
@@ -27,8 +26,7 @@ public static class SpatialOperators2D
             if(dist < smoothingRadius)
             {
                 float Aj = propertySamples[j];
-                float ADiff = Aj-Ai;
-                propertyVal += ADiff*T.Evaluate(dist/smoothingRadius,smoothingRadius)*(particles[j].Mass/particles[j].Density);
+                propertyVal += Aj*T.Evaluate(dist/smoothingRadius,smoothingRadius)*(particles[j].Mass/particles[j].Density);
             }	
             
         });
@@ -37,9 +35,8 @@ public static class SpatialOperators2D
     public static float InterpolateProperty<T>(int i, FluidParticle2D[] particles,ScalarPropertyFunc propertyFunc, float smoothingRadius,SpatialHash2D spatialHash)
         where T:KernelFunc2D
     {
-        float propertyVal = float.CreateChecked(0);
+        float propertyVal = 0;
         Godot.Vector2 pos = particles[i].Position;
-        float Ai = propertyFunc(i);
         spatialHash.ForEachInProximity(pos, 1, j =>
         {
             Godot.Vector2 pointPos = particles[j].Position;
@@ -47,8 +44,7 @@ public static class SpatialOperators2D
             if(dist < smoothingRadius)
             {
                 float Aj = propertyFunc((int)j);
-                float ADiff = Aj-Ai;
-                propertyVal += ADiff*T.Evaluate(dist/smoothingRadius,smoothingRadius)*(particles[j].Mass/particles[j].Density);
+                propertyVal += Aj*T.Evaluate(dist/smoothingRadius,smoothingRadius)*(particles[j].Mass/particles[j].Density);
             }	
             
         });
@@ -60,7 +56,6 @@ public static class SpatialOperators2D
     {
         Godot.Vector2 propertyVal = Godot.Vector2.Zero;
         Godot.Vector2 pos = particles[i].Position;
-        Godot.Vector2 Ai = propertySamples[i];
         spatialHash.ForEachInProximity(pos, 1, j =>
         {
             Godot.Vector2 pointPos = particles[j].Position;
@@ -68,8 +63,7 @@ public static class SpatialOperators2D
             if(dist < smoothingRadius)
             {
                 Godot.Vector2 Aj = propertySamples[j];
-                Godot.Vector2 ADiff = Aj-Ai;
-                propertyVal += ADiff*T.Evaluate(dist/smoothingRadius,smoothingRadius)*(particles[j].Mass/particles[j].Density);
+                propertyVal += Aj*T.Evaluate(dist/smoothingRadius,smoothingRadius)*(particles[j].Mass/particles[j].Density);
             }	
             
         });
@@ -80,7 +74,6 @@ public static class SpatialOperators2D
     {
         Godot.Vector2 propertyVal = Godot.Vector2.Zero;
         Godot.Vector2 pos = particles[i].Position;
-        Godot.Vector2 Ai = propertyFunc(i);
         spatialHash.ForEachInProximity(pos, 1, j =>
         {
             Godot.Vector2 pointPos = particles[j].Position;
@@ -88,8 +81,7 @@ public static class SpatialOperators2D
             if(dist < smoothingRadius)
             {
                 Godot.Vector2 Aj = propertyFunc((int)j);
-                Godot.Vector2 ADiff = Aj-Ai;
-                propertyVal += ADiff*T.Evaluate(dist/smoothingRadius,smoothingRadius)*(particles[j].Mass/particles[j].Density);
+                propertyVal += Aj*T.Evaluate(dist/smoothingRadius,smoothingRadius)*(particles[j].Mass/particles[j].Density);
             }	
             
         });
@@ -170,7 +162,7 @@ public static class SpatialOperators2D
             if(dist < smoothingRadius)
             {
                 float Aj = propertySamples[j];
-                float ADiff = Aj-Ai;
+                float ADiff = Ai-Aj;
                 Godot.Vector2 rij = pos - pointPos;
                 Godot.Vector2 Wij = T.EvaluateGrad(rij,smoothingRadius);
                 propertyVal += ADiff*float.CreateChecked(2)*Wij.Length()/rij.Length()*(particles[j].Mass/particles[j].Density);
@@ -192,7 +184,7 @@ public static class SpatialOperators2D
             if(dist < smoothingRadius)
             {
                 float Aj = propertyFunc((int)j);
-                float ADiff = Aj-Ai;
+                float ADiff = Ai-Aj;
                 Godot.Vector2 rij = pos - pointPos;
                 Godot.Vector2 Wij = T.EvaluateGrad(rij,smoothingRadius);
                 propertyVal += ADiff*float.CreateChecked(2)*Wij.Length()/rij.Length()*(particles[j].Mass/particles[j].Density);
@@ -216,7 +208,7 @@ public static class SpatialOperators2D
             if(dist < smoothingRadius && rij != Godot.Vector2.Zero)
             {
                 Godot.Vector2 Aj = propertySamples[j];
-                Godot.Vector2 ADiff = Aj-Ai;
+                Godot.Vector2 ADiff = Ai-Aj;
                 Godot.Vector2 Wij = T.EvaluateGrad(rij,smoothingRadius);
                 propertyVal += ADiff*float.CreateChecked(2)*Wij.Length()/rij.Length()*(particles[j].Mass/particles[j].Density);
             }	
@@ -234,11 +226,11 @@ public static class SpatialOperators2D
         {
             Godot.Vector2 pointPos = particles[j].Position;
             Godot.Vector2 rij = pos - pointPos;
-            float dist = (rij).Length();
+            float dist = rij.Length();
             if(dist < smoothingRadius && dist > 0)
             {
                 Godot.Vector2 Aj = propertyFunc((int)j);
-                Godot.Vector2 ADiff = Aj-Ai;
+                Godot.Vector2 ADiff = Ai-Aj;
                 Godot.Vector2 Wij = T.EvaluateGrad(rij,smoothingRadius);
                 propertyVal += ADiff*float.CreateChecked(2)*Wij.Length()/dist*(particles[j].Mass/particles[j].Density);
             }	

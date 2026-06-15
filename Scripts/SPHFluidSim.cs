@@ -11,7 +11,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 namespace FluidSim;
 
-public partial class LaplacianFluidSim : Node2D
+public partial class SPHFluidSim : Node2D
 {
 
 	//––––––––––––––––––––––––––––––––––––––––––KERNELS———————————————————————————————————
@@ -230,14 +230,14 @@ public partial class LaplacianFluidSim : Node2D
 		float m_i = Particles[particleIndex].Mass;
 		float density = Particles[particleIndex].Density;
 		float nu = Viscosity/density;
-		return -m_i*nu*SpatialOperators2D.InterpolateLaplacian<CubicSpline2D>(particleIndex,Particles,i=>Particles[i].Velocity,SmoothingRadius,SpatialHash);
+		return m_i*nu*SpatialOperators2D.InterpolateLaplacian<CubicSpline2D>(particleIndex,Particles,i=>Particles[i].Velocity,SmoothingRadius,SpatialHash);
 	}
 
 	public Godot.Vector2 ViscousAccelAtParticle(int particleIndex)
 	{
 		float density = Particles[particleIndex].Density;
 		float nu = Viscosity/density;
-		return -nu*SpatialOperators2D.InterpolateLaplacian<CubicSpline2D>(particleIndex,Particles,i=>Particles[i].Velocity,SmoothingRadius,SpatialHash);
+		return nu*SpatialOperators2D.InterpolateLaplacian<CubicSpline2D>(particleIndex,Particles,i=>Particles[i].Velocity,SmoothingRadius,SpatialHash);
 	}
 
 	//------------------------------------------PRESSURE-----------------------------------
@@ -286,6 +286,7 @@ public partial class LaplacianFluidSim : Node2D
 		float ratio = neededVol/vol;
 		if(ratio < 1)
 		{
+			ratio = Mathf.Min(2.5F*ratio,0.9F);
 			box.Origin += box.Extent*(1 - ratio)/2;
 			box.Extent *= ratio;
 		}
