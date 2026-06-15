@@ -8,6 +8,7 @@ using SPHSpatialOperatorsGodot;
 using SPHKernels.CubicSpline;
 using Utility.ZOrder;
 using System.Collections.Generic;
+using System.Diagnostics;
 namespace FluidSim;
 
 public partial class LaplacianFluidSim : Node2D
@@ -210,10 +211,14 @@ public partial class LaplacianFluidSim : Node2D
 
 		
 	}
+    public double PhysicsLoopAverageTime = 0;
+    public int NumLoops = 0;
+    Stopwatch watch;
 	public override void _PhysicsProcess(double delta)
 	{
 		Step((float)delta);
 	}
+
 
 
 	//––––––––––––––––––––––––––––––––––––––––––FORCE & ACCEL HELPER FUNCTIONS———————————————————————————————————
@@ -328,7 +333,7 @@ public partial class LaplacianFluidSim : Node2D
 			}
 			return 1;
 		});
-		Array.Sort(Particles,Velocities,0,(int)NumberOfParticles,ZComp);
+		Array.Sort(Particles,0,(int)NumberOfParticles,ZComp);
 	}
 
 

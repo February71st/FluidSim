@@ -5,5 +5,7 @@
 [node name="LaplacianFluidSim2D" type="Node2D" unique_id=502335495]
 script = ExtResource("1_t8x1p")
 NumberOfParticles = 2000
+BB = AABB(0, 0, 0, 10, 5, 0)
 GravityDirection = -1.5707963267948966
-DisplayOrigin = Vector2(300, 20)
+DisplayOrigin = Vector2(100, 20)
+ParticleDisplayRadius = 3.0
