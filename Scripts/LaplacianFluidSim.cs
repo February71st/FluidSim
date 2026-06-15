@@ -45,13 +45,13 @@ public partial class LaplacianFluidSim : Node2D
 	/// <summary>
 	/// The radius(m) within which particles will interact with one another. 50cm by default.
 	/// </summary>
-	float SmoothingRadius = 0.5F;
+	float SmoothingRadius = 0.2F;
 	
 	[Export]
 	/// <summary>
 	/// The bounding box that contains the simulation
 	/// </summary>
-	Godot.Aabb BB = new Godot.Aabb(0,0,0,5,5,0);
+	Godot.Aabb BB = new Godot.Aabb(0,0,0,8,5,0);
 	BoundingBox _InternalBB;
 
 	//––––––––––––––––––––––––––––––––––––––––––PARTICLE DATA———————————————————————————————————
@@ -116,12 +116,12 @@ public partial class LaplacianFluidSim : Node2D
 	//------------------------------------------VISCOSITY-----------------------------------
 	[ExportGroup("Viscosity")]
 	[Export]
-	float Viscosity = 1;
+	float Viscosity = 0.01F;
 
 	//------------------------------------------PRESSURE-----------------------------------
 	[ExportGroup("Pressure")]
 	[Export]
-	float PressureMultiplier = 1;
+	float PressureMultiplier = 1.3F;
 
 	//–––––––––––––––––––––––––––––––––––––––DISPLAY SETTINGS–––––––––––––––––––––––––––––
 	[ExportCategory("Display Settings")]

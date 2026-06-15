@@ -5,9 +5,5 @@
 [node name="LaplacianFluidSim2D" type="Node2D" unique_id=502335495]
 script = ExtResource("1_t8x1p")
 NumberOfParticles = 1500
-SmoothingRadius = 0.19999999999999998
-BB = AABB(0, 0, 0, 8, 5, 0)
 GravityDirection = -1.5707963267948966
-Viscosity = 0.01
-PressureMultiplier = 1.3
 DisplayOrigin = Vector2(300, 20)
