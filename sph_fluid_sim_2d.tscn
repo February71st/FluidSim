@@ -1,11 +1,12 @@
 [gd_scene format=3 uid="uid://cnvwri0nenv8l"]
 
-[ext_resource type="Script" uid="uid://bhnk20k4ed033" path="res://Scripts/SPHFluidSim.cs" id="1_nkfws"]
+[ext_resource type="Script" uid="uid://bhnk20k4ed033" path="res://Scripts/SPH/SPHFluidSim.cs" id="1_nkfws"]
+[ext_resource type="Resource" uid="uid://bwm716hrv6kcu" path="res://Resources/Solvers/WCSPH2D.tres" id="2_01v7o"]
 
 [node name="SPHFluidSim2D" type="Node2D" unique_id=502335495]
 script = ExtResource("1_nkfws")
+Solver = ExtResource("2_01v7o")
 NumberOfParticles = 1000
 BB = AABB(0, 0, 0, 10, 5, 0)
 GravityDirection = -1.5707963267948966
 DisplayOrigin = Vector2(100, 20)
-ParticleDisplayRadius = 3.0

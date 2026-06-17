@@ -9,6 +9,8 @@ using SPHKernels.CubicSpline;
 using Utility.ZOrder;
 using System.Collections.Generic;
 using System.Diagnostics;
+using SPHPressureSolvers.IISPH;
+using SPHPressureSolvers;
 namespace FluidSim;
 
 public partial class SPHFluidSim : Node2D
@@ -29,6 +31,10 @@ public partial class SPHFluidSim : Node2D
 	/// Currently,SpatialHash is the only one implemented
 	/// </summary>
 	SpatialHash2D SpatialHash;
+
+	//––––––––––––––––––––––––––––––––––––––––––PRESSURE SOLVER———————————————————————————————————
+	[Export]
+	SPHPressureSolver2D Solver;
 
 	//––––––––––––––––––––––––––––––––––––––––––SIMULATION PARAMETERS———————————————————————————————————
 	[ExportCategory("Simulation Parameters")]
@@ -143,6 +149,7 @@ public partial class SPHFluidSim : Node2D
 
 	public override void _Ready()
 	{
+		GD.Print("WTFFFFFFF");
 		base._Ready();
 		Initialise(this.MaxParticles,this.NumberOfParticles,this.BB);
 	}
@@ -164,6 +171,9 @@ public partial class SPHFluidSim : Node2D
 
 		this.SpatialHash = new SpatialHash2D(MaxParticles,StartingParticles,SmoothingRadius,BoundingBox);
 		this.SpatialHash.Update(Particles);
+		if(Solver == null) Solver = new IISPH2D(MaxParticles);
+		Solver.Setup(MaxParticles);
+		UpdateDensities();
 
 		
 	}
@@ -192,28 +202,34 @@ public partial class SPHFluidSim : Node2D
 					break;
 			}
 			Particles[i].Velocity += Gravity*dt;
+			Particles[i].Velocity += ViscousAccelAtParticle((int)i)*dt;
 			TruePositions[i] = Particles[i].Position;
 			Particles[i].Position += Particles[i].Velocity*0.00833333F;
-			//GD.Print(Particles[i].Position);
+			_InternalBB.ElasticClampToBounds(ref Particles[i].Position,ref Particles[i].Velocity,0.26F);
+			// //GD.Print(Particles[i].Position);
 		});
 		SpatialHash.Update(Particles);
 		UpdateDensities();
+		// Parallel.For(0, NumberOfParticles, i =>
+		// {
+		// 	Particles[i].Velocity += ViscousAccelAtParticle((int)i)*dt;
+		// 	// Particles[i].Velocity += PressureAccelAtParticle((int)i)*dt;
+		// });
+		Solver.SolvePressures<CubicSpline2D>(Particles,NumberOfParticles,SmoothingRadius,dt,0.2F,SpatialHash);
+		Solver.ApplyPressureAccels(Particles,NumberOfParticles,dt);
 		Parallel.For(0, NumberOfParticles, i =>
 		{
-			Particles[i].Velocity += ViscousAccelAtParticle((int)i)*dt;
-			Particles[i].Velocity += PressureAccelAtParticle((int)i)*dt;
-		});
-		Parallel.For(0, NumberOfParticles, i =>
-		{
+			Particles[i].Velocity.Clamp(-2,2);
 			Particles[i].Position = TruePositions[i] + Particles[i].Velocity*dt;
 			_InternalBB.ElasticClampToBounds(ref Particles[i].Position,ref Particles[i].Velocity,0.26F);
 		});
+		//GD.Print(Particles[0].Position);
 
 		
 	}
-    public double PhysicsLoopAverageTime = 0;
-    public int NumLoops = 0;
-    Stopwatch watch;
+	public double PhysicsLoopAverageTime = 0;
+	public int NumLoops = 0;
+	Stopwatch watch;
 	public override void _PhysicsProcess(double delta)
 	{
 		Step((float)delta);
@@ -371,6 +387,7 @@ public partial class SPHFluidSim : Node2D
 
 	public struct BoundingBox
 	{
+		private Random rng = new Random();
 		public static implicit operator Godot.Aabb(BoundingBox bb)
 		{
 			return new Godot.Aabb(bb.Origin.X,bb.Origin.Y,0,bb.Extent.X,bb.Extent.Y,0);
@@ -412,13 +429,18 @@ public partial class SPHFluidSim : Node2D
 			Godot.Vector2 highEnd = Origin + Extent;
 			for(int i = 0; i < 2; i++)
 			{
-				if(pos[i] < highEnd[i])
+				if(pos[i] > highEnd[i])
 				{
 					pos[i] = highEnd[i];
 				}
 				else if(pos[i] < Origin[i])
 				{
 					pos[i] = Origin[i];
+				}
+				if(pos[i] == float.NaN)
+				{
+					GD.Print("NaN found...");
+					pos[i] = Origin[i] + rng.NextSingle()*Extent[i];
 				}
 			}
 		}
@@ -432,8 +454,15 @@ public partial class SPHFluidSim : Node2D
 		public void ElasticClampToBounds (ref Godot.Vector2 pos, ref Godot.Vector2 vel,float attenuationFactor)
 		{
 			Godot.Vector2 highEnd = Origin + Extent;
+			
 			for(int i = 0; i < 2; i++)
 			{
+				if(pos[i] == float.NaN)
+				{
+					GD.Print("NaN found...");
+					pos[i] = Origin[i] + rng.NextSingle()*Extent[i];
+					vel[i] = 0;
+				}
 				if(pos[i] > highEnd[i])
 				{
 					pos[i] = highEnd[i];
@@ -444,6 +473,7 @@ public partial class SPHFluidSim : Node2D
 					pos[i] = Origin[i];
 					vel[i] *= -attenuationFactor;
 				}
+				
 			}
 		}
 	}
