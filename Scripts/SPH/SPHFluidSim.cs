@@ -33,8 +33,23 @@ public partial class SPHFluidSim : Node2D
 	SpatialHash2D SpatialHash;
 
 	//––––––––––––––––––––––––––––––––––––––––––PRESSURE SOLVER———————————————————————————————————
+	SPHPressureSolver2D _Solver;
 	[Export]
-	SPHPressureSolver2D Solver;
+	SPHPressureSolver2D Solver
+	{
+		set
+		{
+			ProcessMode = ProcessModeEnum.Disabled;
+			value.Setup(MaxParticles);
+			_Solver = value;
+			ProcessMode = ProcessModeEnum.Inherit;
+		}
+
+		get
+		{
+			return _Solver;
+		}
+	}
 
 	//––––––––––––––––––––––––––––––––––––––––––SIMULATION PARAMETERS———————————————————————————————————
 	[ExportCategory("Simulation Parameters")]
@@ -53,6 +68,9 @@ public partial class SPHFluidSim : Node2D
 	/// The radius(m) within which particles will interact with one another. 50cm by default.
 	/// </summary>
 	float SmoothingRadius = 0.2F;
+
+	[Export]
+	float TargetDensity = 0.2F;
 	
 	[Export]
 	/// <summary>
@@ -60,6 +78,9 @@ public partial class SPHFluidSim : Node2D
 	/// </summary>
 	Godot.Aabb BB = new Godot.Aabb(0,0,0,8,5,0);
 	BoundingBox _InternalBB;
+
+	[Export]
+	float BoundaryBounceMultiplier = 0.26F;
 
 	//––––––––––––––––––––––––––––––––––––––––––PARTICLE DATA———————————————————————————————————
 	FluidParticle2D[] Particles;
@@ -95,13 +116,14 @@ public partial class SPHFluidSim : Node2D
 	/// </summary>
 	float GravityStrength = 9.8F;
 
-	[Export(PropertyHint.Range,"-360,360,radians_as_degrees")]
+	private float _GravityDirection = -MathF.PI/2;
 	/// <summary>
 	/// The angle (from the vector <1,0>) of the gravity vector
 	/// </summary>
+	[Export(PropertyHint.Range,"-360,360,radians_as_degrees")]
 	float GravityDirection
 	{
-		get=>-GravityUnitVec.Angle();
+		get=>_GravityDirection;
 		set=>SetGravityDirection(value);
 	}
 
@@ -144,6 +166,9 @@ public partial class SPHFluidSim : Node2D
 	[Export]
 	float ParticleDisplayRadius = 5;
 
+	[Export]
+	Color ParticleDisplayColour = Colors.AliceBlue;
+
 
 	//––––––––––––––––––––––––––––––––––––––––––SETUP———————————————————————————————————
 
@@ -166,13 +191,13 @@ public partial class SPHFluidSim : Node2D
 		{
 			Velocities[i] = Vector2.Zero;
 		}
-		InitialiseFluidBox(BB,0.01F);
+		InitialiseFluidBox(BB,TargetDensity);
 		GD.Print(Particles[0].Position);
 
 		this.SpatialHash = new SpatialHash2D(MaxParticles,StartingParticles,SmoothingRadius,BoundingBox);
 		this.SpatialHash.Update(Particles);
 		if(Solver == null) Solver = new IISPH2D(MaxParticles);
-		Solver.Setup(MaxParticles);
+		_Solver.Setup(MaxParticles);
 		UpdateDensities();
 
 		
@@ -201,27 +226,52 @@ public partial class SPHFluidSim : Node2D
 					Gravity = Godot.Vector2.Zero;
 					break;
 			}
-			Particles[i].Velocity += Gravity*dt;
-			Particles[i].Velocity += ViscousAccelAtParticle((int)i)*dt;
+			Vector2 a_g = Gravity;
+			Vector2 a_v = ViscousAccelAtParticle((int)i);
+			// Particles[i].Velocity += Gravity*dt;
+			// Particles[i].Velocity += ViscousAccelAtParticle((int)i)*dt;
+			Particles[i].Velocity += (a_g + a_v)*dt;;
 			TruePositions[i] = Particles[i].Position;
-			Particles[i].Position += Particles[i].Velocity*0.00833333F;
-			_InternalBB.ElasticClampToBounds(ref Particles[i].Position,ref Particles[i].Velocity,0.26F);
+			
 			// //GD.Print(Particles[i].Position);
 		});
-		SpatialHash.Update(Particles);
-		UpdateDensities();
+		
+		if(_Solver is WCSPH2D wc)
+		{
+			Parallel.For(0, (int)NumberOfParticles,i=>
+			{
+				Particles[i].Position += Particles[i].Velocity*0.00833333F;
+				_InternalBB.ElasticClampToBounds(ref Particles[i].Position,ref Particles[i].Velocity,BoundaryBounceMultiplier);
+			});
+			SpatialHash.Update(Particles);
+			UpdateDensities();
+			wc.SolvePressures<CubicSpline2D>(Particles,NumberOfParticles,SmoothingRadius,dt,TargetDensity,SpatialHash);
+			wc.ApplyPressureAccels(Particles,NumberOfParticles,dt);
+		}
+		else
+		{
+			_Solver.SolvePressures<CubicSpline2D>(Particles,NumberOfParticles,SmoothingRadius,dt,TargetDensity,SpatialHash);
+			_Solver.ApplyPressureAccels(Particles,NumberOfParticles,dt);
+			Parallel.For(0, (int)NumberOfParticles,i=>
+			{
+				Particles[i].Position += Particles[i].Velocity*0.00833333F;
+				_InternalBB.ElasticClampToBounds(ref Particles[i].Position,ref Particles[i].Velocity,BoundaryBounceMultiplier);
+			});
+			SpatialHash.Update(Particles);
+			UpdateDensities();
+		}
+		
 		// Parallel.For(0, NumberOfParticles, i =>
 		// {
 		// 	Particles[i].Velocity += ViscousAccelAtParticle((int)i)*dt;
 		// 	// Particles[i].Velocity += PressureAccelAtParticle((int)i)*dt;
 		// });
-		Solver.SolvePressures<CubicSpline2D>(Particles,NumberOfParticles,SmoothingRadius,dt,0.2F,SpatialHash);
-		Solver.ApplyPressureAccels(Particles,NumberOfParticles,dt);
+		
 		Parallel.For(0, NumberOfParticles, i =>
 		{
 			Particles[i].Velocity.Clamp(-2,2);
 			Particles[i].Position = TruePositions[i] + Particles[i].Velocity*dt;
-			_InternalBB.ElasticClampToBounds(ref Particles[i].Position,ref Particles[i].Velocity,0.26F);
+			_InternalBB.ElasticClampToBounds(ref Particles[i].Position,ref Particles[i].Velocity,BoundaryBounceMultiplier);
 		});
 		//GD.Print(Particles[0].Position);
 
@@ -265,7 +315,7 @@ public partial class SPHFluidSim : Node2D
 
 	public float GetPressureMagnitude(int i)
 	{
-		return PressureMultiplier*MathF.Max(Particles[i].Density/0.2F - 1,0);//PressureMultiplier*(Particles[i].Density-0.2F);
+		return PressureMultiplier*MathF.Max(Particles[i].Density/TargetDensity - 1,0);//PressureMultiplier*(Particles[i].Density-0.2F);
 	}
 
 
@@ -316,6 +366,7 @@ public partial class SPHFluidSim : Node2D
 
 	public void SetGravityDirection(float dir)
 	{
+		_GravityDirection = dir;
 		GravityUnitVec = Godot.Vector2.FromAngle(-dir);
 	}
 
@@ -364,7 +415,7 @@ public partial class SPHFluidSim : Node2D
 		for(int i = 0; i < NumberOfParticles; i++)
 		{
 			//GD.Print(Particles[i].Position, "\t" ,ToDisplayCoords(Particles[i].Position));
-			DrawCircle(ToDisplayCoords(Particles[i].Position),ParticleDisplayRadius,Colors.White);
+			DrawCircle(ToDisplayCoords(Particles[i].Position),ParticleDisplayRadius,ParticleDisplayColour);
 		}
 
 	}

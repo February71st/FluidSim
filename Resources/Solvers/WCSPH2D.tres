@@ -1,7 +1,8 @@
 [gd_resource type="Resource" script_class="WCSPH2D" format=3 uid="uid://bwm716hrv6kcu"]
 
 [ext_resource type="Script" uid="uid://d1p20008nly8k" path="res://Scripts/SPH/FluidSim/Solvers/Pressure/WCSPH2D.cs" id="1_6lrs4"]
+[ext_resource type="Resource" uid="uid://oquq4jmvejbw" path="res://Resources/Solvers/WCSPH State Equations/SingleConstantDifferenceEq.tres" id="1_uxq0d"]
 
 [resource]
 script = ExtResource("1_6lrs4")
-PressureMultiplier = 2.0
+StateEquation = ExtResource("1_uxq0d")

@@ -1,0 +1,6 @@
+[gd_resource type="Resource" format=3 uid="uid://dvgk3cjk7u4hl"]
+
+[ext_resource type="Script" uid="uid://bjpx77oq1s41o" path="res://Scripts/SPH/FluidSim/Solvers/Pressure/WCSPH State Equations/SingleConstantQuotientEq.cs" id="1_8n2vu"]
+
+[resource]
+script = ExtResource("1_8n2vu")

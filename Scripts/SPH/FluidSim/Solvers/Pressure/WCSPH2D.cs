@@ -7,11 +7,12 @@ using SPHTypes;
 using SPHSpatialOperatorsGodot;
 using SPHKernels;
 using System.Threading.Tasks;
+using SPHPressureSolvers.StateEqs;
 [GlobalClass]
 public partial class WCSPH2D : SPHPressureSolver2D
 {
     [Export]
-    public float PressureMultiplier = 1F;
+    public PressureStateEquation StateEquation = new SingleConstantDifferenceEq();
 
     private Vector2[] PressureAccels;
 
@@ -22,12 +23,7 @@ public partial class WCSPH2D : SPHPressureSolver2D
 
     private Vector2 GetPressureAccel<T>(int i, FluidParticle2D[]particles,float h, float targetDensity,SpatialHash2D spatialHash) where T:KernelFunc2D
     {
-        return -SpatialOperators2D.InterpolatePropertyGradient<T>(i,particles,j=>GetPressureMagnitude(j,particles,targetDensity),h,spatialHash)/particles[i].Density;
-    }
-
-    private float GetPressureMagnitude(int i, FluidParticle2D[] particles, float targetDensity)
-    {
-        return PressureMultiplier*MathF.Max(particles[i].Density/targetDensity - 1,0);
+        return -SpatialOperators2D.InterpolatePropertyGradient<T>(i,particles,j=>StateEquation.GetPressureMag(j,particles,targetDensity),h,spatialHash)/particles[i].Density;
     }
 
     public override void SolvePressures<T>(FluidParticle2D[] particles, uint numberOfParticles, float h, float dt, float targetDensity, SpatialHash2D spatialHash)

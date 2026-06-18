@@ -6,7 +6,10 @@
 [node name="SPHFluidSim2D" type="Node2D" unique_id=502335495]
 script = ExtResource("1_nkfws")
 Solver = ExtResource("2_01v7o")
-NumberOfParticles = 1000
-BB = AABB(0, 0, 0, 10, 5, 0)
-GravityDirection = -1.5707963267948966
+NumberOfParticles = 3000
+MaxParticles = 3000
+BB = AABB(0, 0, 0, 16, 10, 0)
+BoundaryBounceMultiplier = 0.87
+DisplayScale = 60.0
 DisplayOrigin = Vector2(100, 20)
+ParticleDisplayColour = Color(0.256, 0.4826667, 0.8, 0.45490196)

@@ -1,0 +1,8 @@
+[gd_resource type="Resource" format=3 uid="uid://dlumo13h30v7p"]
+
+[ext_resource type="Script" uid="uid://dss65uswomj8l" path="res://Scripts/SPH/FluidSim/Solvers/Pressure/WCSPH State Equations/DoubleConstantQuotientEq.cs" id="1_1a6ra"]
+
+[resource]
+script = ExtResource("1_1a6ra")
+k_mul = 1.2
+k_pow = 1.5

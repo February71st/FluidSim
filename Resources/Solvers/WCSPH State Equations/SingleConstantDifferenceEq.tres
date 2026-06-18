@@ -1,0 +1,7 @@
+[gd_resource type="Resource" format=3 uid="uid://oquq4jmvejbw"]
+
+[ext_resource type="Script" uid="uid://dwmngy3s16aka" path="res://Scripts/SPH/FluidSim/Solvers/Pressure/WCSPH State Equations/SingleConstantDifferenceEq.cs" id="1_h6mwo"]
+
+[resource]
+script = ExtResource("1_h6mwo")
+k = 12.0

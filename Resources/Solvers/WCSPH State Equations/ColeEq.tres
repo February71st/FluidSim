@@ -1,0 +1,8 @@
+[gd_resource type="Resource" format=3 uid="uid://cnpefdi5iisyf"]
+
+[ext_resource type="Script" uid="uid://dcb3imjy1u43e" path="res://Scripts/SPH/FluidSim/Solvers/Pressure/WCSPH State Equations/ColeEq.cs" id="1_d5ald"]
+
+[resource]
+script = ExtResource("1_d5ald")
+c = 1.9
+gamma = 2.0

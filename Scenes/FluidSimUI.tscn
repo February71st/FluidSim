@@ -1,0 +1,45 @@
+[gd_scene format=3 uid="uid://33s4c8mxlvd8"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_jypp2"]
+bg_color = Color(0.44000003, 0.5225, 0.55, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_xcyhk"]
+bg_color = Color(0.34, 0.18665999, 0.11559999, 1)
+
+[node name="FluidSimUi" type="Control" unique_id=84673007]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Background" type="PanelContainer" parent="." unique_id=1496252403]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_jypp2")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="Background" unique_id=1385831764]
+layout_mode = 2
+
+[node name="PanelContainer" type="PanelContainer" parent="Background/VBoxContainer" unique_id=47333604]
+custom_minimum_size = Vector2(0, 30)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_xcyhk")
+
+[node name="MarginContainer" type="MarginContainer" parent="Background/VBoxContainer/PanelContainer" unique_id=2022674937]
+layout_mode = 2
+theme_override_constants/margin_left = 6
+theme_override_constants/margin_top = 6
+theme_override_constants/margin_right = 6
+theme_override_constants/margin_bottom = 6
+
+[node name="HBoxContainer" type="HBoxContainer" parent="Background/VBoxContainer/PanelContainer/MarginContainer" unique_id=100992496]
+layout_mode = 2
+
+[node name="Button" type="Button" parent="Background/VBoxContainer/PanelContainer/MarginContainer/HBoxContainer" unique_id=531535492]
+layout_mode = 2

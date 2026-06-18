@@ -1,0 +1,7 @@
+[gd_resource type="Resource" format=3 uid="uid://w52i2enam6rr"]
+
+[ext_resource type="Script" uid="uid://bomdgnv75vm1a" path="res://Scripts/SPH/FluidSim/Solvers/Pressure/PCISPH2D.cs" id="1_i1c21"]
+
+[resource]
+script = ExtResource("1_i1c21")
+ErrorThreshold = 9.999999999999999e-05
